@@ -1,1 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stake Dice Replica</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0b111d] text-white min-h-screen flex items-center justify-center p-4 font-sans">
+  <div class="flex w-full max-w-4xl rounded-xl overflow-hidden shadow-lg border border-[#1d283a]">
+    
+    <!-- LEFT PANEL -->
+    <div class="w-1/3 bg-[#131e2b] p-4 space-y-4 border-r border-[#1d283a]">
+      <div class="flex justify-between text-sm">
+        <button class="bg-[#1e2a38] px-3 py-1 rounded text-white font-bold">Manual</button>
+        <button class="text-gray-400 px-3 py-1 rounded">Auto</button>
+      </div>
 
+      <div>
+        <label class="block text-sm text-gray-400 mb-1">Amount</label>
+        <input type="number" id="betAmount" class="w-full p-2 rounded bg-[#0f1724] text-white border border-[#2a3d55]" value="0.00" />
+        <div class="text-right text-gray-400 text-sm mt-1">⚙️</div>
+      </div>
+
+      <div>
+        <label class="block text-sm text-gray-400 mb-1">Net Gain on Win</label>
+        <input type="text" readonly id="netGain" class="w-full p-2 rounded bg-[#0f1724] text-white border border-[#2a3d55]" value="0.00" />
+      </div>
+
+      <button onclick="rollDice()" class="w-full bg-[#00ff75] hover:bg-[#00e466] text-black font-bold text-lg py-2 rounded transition">Play</button>
+    </div>
+
+    <!-- MAIN GAME AREA -->
+    <div class="w-2/3 bg-[#0f1724] p-6 flex flex-col justify-between">
+      <div>
+        <label class="block mb-2 text-sm text-gray-300">Win Chance</label>
+        <input type="range" id="chanceSlider" min="1" max="95" value="49.5" step="0.1" class="w-full accent-[#00ff75]" />
+        
+        <div class="relative w-full mt-4 h-4 bg-[#1e2a38] rounded-full">
+          <div class="absolute top-0 bottom-0 left-0 bg-red-500 rounded-l-full" id="redBar" style="width: 50%"></div>
+          <div class="absolute top-0 bottom-0 right-0 bg-green-500 rounded-r-full" id="greenBar" style="width: 50%"></div>
+          <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-4 h-8 bg-blue-400 rounded" id="sliderMarker"></div>
+        </div>
+      </div>
+
+      <!-- RESULT BOX -->
+      <div class="mt-8 grid grid-cols-3 text-center gap-4 text-sm text-gray-300">
+        <div>
+          <div>Winnings</div>
+          <div class="text-lg text-white font-semibold">x<span id="winnings">2.00</span></div>
+        </div>
+        <div>
+          <div>Roll Over</div>
+          <div class="text-lg text-white font-semibold" id="rollOver">50.50</div>
+        </div>
+        <div>
+          <div>Win Chance</div>
+          <div class="text-lg text-white font-semibold"><span id="chanceDisplay">49.50</span>%</div>
+        </div>
+      </div>
+
+      <!-- RESULT TEXT -->
+      <div id="resultText" class="text-center text-lg mt-6 text-gray-400">Roll to start!</div>
+    </div>
+  </div>
+
+  <script>
+    const chanceSlider = document.getElementById("chanceSlider");
+    const chanceDisplay = document.getElementById("chanceDisplay");
+    const rollOver = document.getElementById("rollOver");
+    const winnings = document.getElementById("winnings");
+    const netGain = document.getElementById("netGain");
+    const resultText = document.getElementById("resultText");
+    const redBar = document.getElementById("redBar");
+    const greenBar = document.getElementById("greenBar");
+    const sliderMarker = document.getElementById("sliderMarker");
+    const betAmount = document.getElementById("betAmount");
+
+    function updateUI() {
+      const chance = parseFloat(chanceSlider.value);
+      const payout = (100 / chance).toFixed(2);
+      const rolloverValue = (100 - chance).toFixed(2);
+      const bet = parseFloat(betAmount.value);
+
+      winnings.textContent = payout;
+      rollOver.textContent = rolloverValue;
+      chanceDisplay.textContent = chance.toFixed(2);
+      netGain.value = (bet * (payout - 1)).toFixed(2);
+
+      redBar.style.width = `${chance}%`;
+      greenBar.style.width = `${100 - chance}%`;
+      sliderMarker.style.left = `${chance}%`;
+    }
+
+    chanceSlider.addEventListener("input", updateUI);
+    betAmount.addEventListener("input", updateUI);
+
+    function rollDice() {
+      const chance = parseFloat(chanceSlider.value);
+      const roll = Math.random() * 100;
+      const win = roll > (100 - chance);
+      resultText.innerHTML = `🎯 Roll: <b>${roll.toFixed(2)}</b><br>${win ? '<span class="text-green-400">✅ You Win!</span>' : '<span class="text-red-400">❌ You Lose!</span>'}`;
+    }
+
+    updateUI();
+  </script>
+</body>
+</html>
